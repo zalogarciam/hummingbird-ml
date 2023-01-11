@@ -30,7 +30,8 @@ public class Flower : MonoBehaviour
     /// </summary>
     public Vector3 FlowerUpVector 
     {
-        get {
+        get 
+        {
             return nectarCollider.transform.up;
         }
     }
@@ -40,7 +41,8 @@ public class Flower : MonoBehaviour
     /// </summary>
     public Vector3 FlowerCenterPosition 
     {
-        get {
+        get 
+        {
             return nectarCollider.transform.position;
         }
     }
@@ -55,7 +57,8 @@ public class Flower : MonoBehaviour
     /// </summary>
     public bool HasNectar 
     {
-        get {
+        get 
+        {
             return NectarAmount > 0;
         }
     }
@@ -104,5 +107,19 @@ public class Flower : MonoBehaviour
 
         // Change the flower color to inidicate that it is full
         flowerMaterial.SetColor("_BaseColor", fullFlowerColor);
+    }
+
+    /// <summary>
+    ///  Called when the flower wakes up
+    /// </summary>
+    private void Awake()
+    {
+        // Find the flower's mesh renderer and get the main material
+        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+        flowerMaterial = meshRenderer.material;
+
+        // Find flower and nectar colliders
+        flowerCollider = transform.Find("FlowerCollider").GetComponent<Collider>();
+        nectarCollider = transform.Find("FlowerNectarCollider").GetComponent<Collider>();
     }
 }
