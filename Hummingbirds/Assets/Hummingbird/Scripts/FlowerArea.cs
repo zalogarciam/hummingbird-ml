@@ -18,7 +18,94 @@ public class FlowerArea : MonoBehaviour
     private Dictionary<Collider, Flower> nectarFlowerDictionary;
 
     /// <summary>
-    /// List of all flowers in the flower area
+    ///     List of all flowers in the flower area
     /// </summary>
     public List<Flower> Flowers { get; private set; }
+
+    /// <summary>
+    ///     Reset flowers and flower plants
+    /// </summary>
+    public void ResetFlowers()
+    {
+        // Rotate each flower plant around the Y axis and subtly around X and Z
+        foreach (var flowerPlant in flowerPlants)
+        {
+            var xRotation = Random.Range(-5f, 5f);
+            var yRotation = Random.Range(-180f, 180f);
+            var zRotation = Random.Range(-5f, 5f);
+            flowerPlant.transform.localRotation = Quaternion.Euler(xRotation, yRotation, zRotation);
+        }
+
+        // Reset each flower
+        foreach (var flower in Flowers) flower.ResetFlower();
+    }
+
+    /// <summary>
+    ///     Gets The <see cref="Flower" /> that a nectar collider belongs to
+    /// </summary>
+    /// <param name="collider"> The nectar collider</param>
+    /// <returns>The matching flower</returns>
+    public Flower GetFlowerFromNectar(Collider collider)
+    {
+        return nectarFlowerDictionary[collider];
+    }
+
+    /// <summary>
+    ///     Call when teh are wakes up
+    /// </summary>
+    private void Awake()
+    {
+        // Initialize variables
+        flowerPlants = new List<GameObject>();
+        nectarFlowerDictionary = new Dictionary<Collider, Flower>();
+        Flowers = new List<Flower>();
+    }
+
+    /// <summary>
+    ///     Called when the game starts
+    /// </summary>
+    private void Start()
+    {
+        //Find all flowers that are children of this GameObject/Transform
+        FindChildFlowers(transform);
+    }
+
+    /// <summary>
+    ///     Recursively finds all flowers and flower plants that are children of a parent transform
+    /// </summary>
+    /// <param name="parent">The parent of the children to check</param>
+    private void FindChildFlowers(Transform parent)
+    {
+        for (var i = 0; i < parent.childCount; i++)
+        {
+            var child = parent.GetChild(i);
+            if (child.CompareTag("flower_plant"))
+            {
+                // Found a flower plant, add it to the flower plants list
+                flowerPlants.Add(child.gameObject);
+
+                FindChildFlowers(child);
+            }
+            else
+            {
+                // Not a flower plant, look for a Flower component
+                var flower = child.GetComponent<Flower>();
+                if (flower != null)
+                {
+                    // Found a flower, add it to the Flowers list
+                    Flowers.Add(flower);
+
+                    // Add the nectar collider to the lookup dictionary
+                    nectarFlowerDictionary.Add(flower.nectarCollider, flower);
+
+                    // Note: there are no flowers that are children of other flowers
+                }
+                else
+                {
+                    // Flower component not found, so check children
+                    FindChildFlowers(child);
+                }
+            }
+        }
+    }
 }
