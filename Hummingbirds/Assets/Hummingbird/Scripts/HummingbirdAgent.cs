@@ -15,9 +15,6 @@ public class HummingbirdAgent : Agent
 
     // Maximum distance from the beak tip to accept nectar collision
     private const float BeakTipRadius = 0.008f;
-
-    // Whether the agent is frozen (intentionally not flying)
-    private readonly bool frozen = false;
     [Tooltip("The agent's camera")] public Camera agentCamera;
 
     [Tooltip("Transform at the tip of the beak")]
@@ -25,6 +22,9 @@ public class HummingbirdAgent : Agent
 
     // The flower are that the agent is i n
     private FlowerArea flowerArea;
+
+    // Whether the agent is frozen (intentionally not flying)
+    private bool frozen;
 
     [Tooltip("Force to apply when moving")]
     public float moveForce = 2f;
@@ -223,6 +223,26 @@ public class HummingbirdAgent : Agent
         actionsOut.ContinuousActions.Array[2] = combined.z;
         actionsOut.ContinuousActions.Array[3] = pitch;
         actionsOut.ContinuousActions.Array[4] = yaw;
+    }
+
+    /// <summary>
+    ///     Prevent the agent from moving and taking actions
+    /// </summary>
+    public void FreezeAgent()
+    {
+        Debug.Assert(trainingMode == false, "Freeze/Unfreeze not supported in training");
+        frozen = true;
+        rigidbody.Sleep();
+    }
+
+    /// <summary>
+    ///     Resume agent movement and actions
+    /// </summary>
+    public void UnfreezeAgent()
+    {
+        Debug.Assert(trainingMode == false, "Freeze/Unfreeze not supported in training");
+        frozen = false;
+        rigidbody.WakeUp();
     }
 
     /// <summary>
