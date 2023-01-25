@@ -177,6 +177,55 @@ public class HummingbirdAgent : Agent
     }
 
     /// <summary>
+    ///     When behaviour type is set to "Heuristic Only" on the agent's Behavior parameters
+    ///     this function will be called. Its return values will be fed into
+    ///     <see cref="OnActionReceived(ActionBuffers)" /> instead of using the neural network
+    /// </summary>
+    /// <param name="actionsOut">An output action array</param>
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        // Create placeholders for all movement/turning
+        var forward = Vector3.zero;
+        var left = Vector3.zero;
+        var up = Vector3.zero;
+        var pitch = 0f;
+        var yaw = 0f;
+
+        // Convert keyboard inputs to movement and turning
+        // All values should be between -1 and +1
+
+        // Forward/backward
+        if (Input.GetKey(KeyCode.W)) forward = transform.forward;
+        else if (Input.GetKey(KeyCode.S)) forward = -transform.forward;
+
+        // Left/right
+        if (Input.GetKey(KeyCode.A)) left = transform.right;
+        else if (Input.GetKey(KeyCode.D)) left = -transform.right;
+
+        // Up.down
+        if (Input.GetKey(KeyCode.E)) up = transform.up;
+        else if (Input.GetKey(KeyCode.C)) up = -transform.up;
+
+        // Pitch up/down
+        if (Input.GetKey(KeyCode.UpArrow)) pitch = 1f;
+        else if (Input.GetKey(KeyCode.DownArrow)) pitch = -1f;
+
+        // Turn left/right
+        if (Input.GetKey(KeyCode.LeftArrow)) yaw = 1f;
+        else if (Input.GetKey(KeyCode.RightArrow)) yaw = -1f;
+
+        // Combine the movement vector and normalize
+        var combined = (forward + left + up).normalized;
+
+        // Add the 3 movements values, pitch and yaw to the actionsOut array
+        actionsOut.ContinuousActions.Array[0] = combined.x;
+        actionsOut.ContinuousActions.Array[1] = combined.y;
+        actionsOut.ContinuousActions.Array[2] = combined.z;
+        actionsOut.ContinuousActions.Array[3] = pitch;
+        actionsOut.ContinuousActions.Array[4] = yaw;
+    }
+
+    /// <summary>
     ///     Update the nearest flower to the agent
     /// </summary>
     /// <exception cref="NotImplementedException"></exception>
@@ -256,7 +305,7 @@ public class HummingbirdAgent : Agent
             var colliders = Physics.OverlapSphere(potentialPosition, 0.05f);
 
             // Safe position has been found if no colliders are overlapped
-            safePositionFound = colliders.Length = 0;
+            safePositionFound = colliders.Length == 0;
         }
 
         Debug.Assert(safePositionFound, "Could not find a safe position to spawn");
