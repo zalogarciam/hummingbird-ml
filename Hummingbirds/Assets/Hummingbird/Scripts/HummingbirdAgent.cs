@@ -402,4 +402,23 @@ public class HummingbirdAgent : Agent
             // Collided with the are boundary, give a negative reward
             AddReward(-.5f);
     }
+
+    /// <summary>
+    ///     Called every frame
+    /// </summary>
+    private void Update()
+    {
+        // Draw a line from the beak tip to the nearest flower
+        if (nearestFlower != null)
+            Debug.DrawLine(beakTip.position, nearestFlower.FlowerCenterPosition, Color.green);
+    }
+
+    /// <summary>
+    ///     Called every .02 seconds
+    /// </summary>
+    private void FixedUpdate()
+    {
+        // Avoids scenario where nearest flower nectar is stolen by opponent and not updated
+        if (nearestFlower != null && !nearestFlower.HasNectar) UpdateNearestFlower();
+    }
 }
