@@ -105,7 +105,7 @@ public class Flower : MonoBehaviour
         flowerCollider.gameObject.SetActive(true);
         nectarCollider.gameObject.SetActive(true);
 
-        // Change the flower color to inidicate that it is full
+        // Change the flower color to indicate that it is full
         flowerMaterial.SetColor("_BaseColor", fullFlowerColor);
     }
 
