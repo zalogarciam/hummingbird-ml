@@ -1,6 +1,7 @@
 using System;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Sensors;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,6 +15,9 @@ public class HummingbirdAgent : Agent
 
     // Maximum distance from the beak tip to accept nectar collision
     private const float BeakTipRadius = 0.008f;
+
+    // Whether the agent is frozen (intentionally not flying)
+    private readonly bool frozen = false;
     [Tooltip("The agent's camera")] public Camera agentCamera;
 
     [Tooltip("Transform at the tip of the beak")]
@@ -21,9 +25,6 @@ public class HummingbirdAgent : Agent
 
     // The flower are that the agent is i n
     private FlowerArea flowerArea;
-
-    // Whether the agent is frozen (intentionally not flying)
-    private readonly bool frozen = false;
 
     [Tooltip("Force to apply when moving")]
     public float moveForce = 2f;
@@ -137,6 +138,42 @@ public class HummingbirdAgent : Agent
 
         // Apply the new rotation
         transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+    }
+
+    /// <summary>
+    ///     Collect vector observations from the environment
+    /// </summary>
+    /// <param name="sensor">The vector sensor</param>
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        // If nearestFlower is null, observe an empty array and return early
+        if (nearestFlower == null)
+        {
+            sensor.AddObservation(new float[10]);
+            return;
+        }
+
+        // Observe the agent's local rotation (4 observations)
+        sensor.AddObservation(transform.localRotation.normalized);
+
+        // Get a vector from the beak tip to the nearest flower
+        var toFlower = nearestFlower.FlowerCenterPosition - beakTip.position;
+
+        // Observe a normalized vector pointing to the nearest flower (3 observations)
+        sensor.AddObservation(toFlower.normalized);
+
+        // Observe a dot product that indicates whether the beak tip is in front of the flower (1 observation)
+        // (+1 means that the beak tip is directly in front of the flower, -1 means directly behind)
+        sensor.AddObservation(Vector3.Dot(toFlower.normalized, -nearestFlower.FlowerUpVector.normalized));
+
+        // Observe a dot product that indicated whether the beak is pointing towards the flower (1 observation)
+        // (+1 means that the beak is pointing directly at the flower, -1 means directly away)
+        sensor.AddObservation(Vector3.Dot(beakTip.forward.normalized, -nearestFlower.FlowerUpVector.normalized));
+
+        // Observe the relative distance from the beak tip to the flower (1 observation)
+        sensor.AddObservation(toFlower.magnitude / FlowerArea.AreaDiameter);
+
+        // 10 total observations
     }
 
     /// <summary>
