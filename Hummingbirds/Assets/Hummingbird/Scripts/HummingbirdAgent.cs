@@ -93,9 +93,29 @@ public class HummingbirdAgent : Agent
         UpdateNearestFlower();
     }
 
+    /// <summary>
+    ///     Update the nearest flower to the agent
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
     private void UpdateNearestFlower()
     {
-        throw new NotImplementedException();
+        foreach (var flower in flowerArea.Flowers)
+            if (nearestFlower == null && flower.HasNectar)
+            {
+                // No current flower and this flower has nectar, so set to this flower
+                nearestFlower = flower;
+            }
+            else if (flower.HasNectar)
+            {
+                // Calculate distance to this flower and distance to the current nearest flower
+                var distanceToFlower = Vector3.Distance(flower.transform.position, beakTip.position);
+                var distanceToCurrentNearestFlower =
+                    Vector3.Distance(nearestFlower.transform.position, beakTip.position);
+
+                // If current nearest flower is empty OR this flower is closer, update the nearest flower
+                if (!nearestFlower.HasNectar || distanceToFlower < distanceToCurrentNearestFlower)
+                    nearestFlower = flower;
+            }
     }
 
     /// <summary>
