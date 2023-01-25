@@ -1,5 +1,6 @@
 using System;
 using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -22,7 +23,7 @@ public class HummingbirdAgent : Agent
     private FlowerArea flowerArea;
 
     // Whether the agent is frozen (intentionally not flying)
-    private bool frozen = false;
+    private readonly bool frozen = false;
 
     [Tooltip("Force to apply when moving")]
     public float moveForce = 2f;
@@ -36,10 +37,10 @@ public class HummingbirdAgent : Agent
     private new Rigidbody rigidbody;
 
     // Allows for smoother pitch changes
-    private float smoothPitchChange = 0f;
+    private float smoothPitchChange;
 
     // Allows for smoother yaw changes
-    private float smoothYawChange = 0f;
+    private float smoothYawChange;
 
     [Tooltip("Whether this is training mode or gameplay mode")]
     public bool trainingMode;
@@ -91,6 +92,51 @@ public class HummingbirdAgent : Agent
 
         // Recalculate the nearest flower now that the agent has moved
         UpdateNearestFlower();
+    }
+
+    /// <summary>
+    ///     Called when an action is received from either the player input o
+    ///     actions[i] represents:
+    ///     Index 0: move vector x (+1 = right, -1 = left)
+    ///     Index 1: move vector y (+1 = up, -1 = down)
+    ///     Index 2: move vector z (+1 = forward, -1 = backward)
+    ///     Index 3: pitch angle (+1 = pitch up, -1 = pitch down)
+    ///     Index 4: yaw angle (+1 = turn right, -1 = turn left)
+    /// </summary>
+    /// <param name="actions">The actions to take</param>
+    public override void OnActionReceived(ActionBuffers actions)
+    {
+        // Don't take actions if frozen
+        if (frozen) return;
+
+        // Calculate movement vector
+        var move = new Vector3(actions.ContinuousActions.Array[0], actions.ContinuousActions.Array[1],
+            actions.ContinuousActions.Array[2]);
+
+        // Add force in the direction of the move vector
+        rigidbody.AddForce(move * moveForce);
+
+        // Get the current rotation
+        var rotationVector = transform.rotation.eulerAngles;
+
+        // Calculate pitch and yaw rotation
+        var pitchChange = actions.ContinuousActions.Array[3];
+        var yawChange = actions.ContinuousActions.Array[4];
+
+        // Calculate smooth rotation changes
+        smoothPitchChange = Mathf.MoveTowards(smoothPitchChange, pitchChange, 2f * Time.fixedDeltaTime);
+        smoothYawChange = Mathf.MoveTowards(smoothYawChange, yawChange, 2f * Time.fixedDeltaTime);
+
+        // Calculate new pitch and yaw based on smoothed values
+        // Clamp pitch to avoid flipping upside down
+        var pitch = rotationVector.x + smoothPitchChange * Time.fixedDeltaTime * pitchSpeed;
+        if (pitch > 180f) pitch -= 360f;
+        pitch = Mathf.Clamp(pitch, -MaxPitchAngle, MaxPitchAngle);
+
+        var yaw = rotationVector.y + smoothYawChange * Time.fixedDeltaTime * yawSpeed;
+
+        // Apply the new rotation
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
     }
 
     /// <summary>
