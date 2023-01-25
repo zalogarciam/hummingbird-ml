@@ -334,4 +334,61 @@ public class HummingbirdAgent : Agent
         transform.position = potentialPosition;
         transform.rotation = potentialRotation;
     }
+
+    /// <summary>
+    ///     Called when the agent's collider enters a trigger collider
+    /// </summary>
+    /// <param name="other">The trigger collider</param>
+    private void OnTriggerEnter(Collider other)
+    {
+        TriggerEnterOrStay(other);
+    }
+
+    /// <summary>
+    ///     Called when the agent's collider stays in a trigger collider
+    /// </summary>
+    /// <param name="other">The trigger collider</param>
+    private void OnTriggerStay(Collider other)
+    {
+        TriggerEnterOrStay(other);
+    }
+
+    /// <summary>
+    ///     Handles when the agent's collider enters or stays in a trigger collider
+    /// </summary>
+    /// <param name="collider">The trigger collider</param>
+    private void TriggerEnterOrStay(Collider collider)
+    {
+        // Check if agent is colliding with nectar
+        if (collider.CompareTag("nectar"))
+        {
+            var closestPointToBeakTip = collider.ClosestPoint(beakTip.position);
+
+            // Check if the closest collision point is close to the beak tip
+            // Note: a collision with anything but the beak tip should not count
+            if (Vector3.Distance(beakTip.position, closestPointToBeakTip) < BeakTipRadius)
+            {
+                // Look up the flower for this nectar collider
+                var flower = flowerArea.GetFlowerFromNectar(collider);
+
+                // Attempt to take .01 nectar
+                // Note: this is per fixed time step, meaning it happens every .02 seconds, or 50x per second
+                var nectarReceived = flower.Feed(.01f);
+
+                // Keep track of nectar obtained
+                NectarObtained += nectarReceived;
+
+                if (trainingMode)
+                {
+                    // Calculate reward for getting nectar
+                    var bonus = .02f * Mathf.Clamp01(Vector3.Dot(transform.forward.normalized,
+                        -nearestFlower.FlowerUpVector.normalized));
+                    AddReward(.01f + bonus);
+                }
+
+                // If flower is empty, update the nearest flower
+                if (!flower.HasNectar) UpdateNearestFlower();
+            }
+        }
+    }
 }
