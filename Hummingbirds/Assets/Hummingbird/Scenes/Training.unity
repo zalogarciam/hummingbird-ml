@@ -131,17 +131,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4136009330333347729, guid: 423815a9aec87fb48bbb6f0f35a66653, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4420374660899403437, guid: 423815a9aec87fb48bbb6f0f35a66653, type: 3}
       propertyPath: m_Name
       value: FloatingIsland
-      objectReference: {fileID: 0}
-    - target: {fileID: 6603312214119831859, guid: 423815a9aec87fb48bbb6f0f35a66653, type: 3}
-      propertyPath: m_Enabled
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8703149456917459529, guid: 423815a9aec87fb48bbb6f0f35a66653, type: 3}
       propertyPath: m_RootOrder
@@ -186,10 +178,6 @@ PrefabInstance:
     - target: {fileID: 8703149456917459529, guid: 423815a9aec87fb48bbb6f0f35a66653, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9146113749162041798, guid: 423815a9aec87fb48bbb6f0f35a66653, type: 3}
-      propertyPath: m_Enabled
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
