@@ -79,7 +79,7 @@ public class FlowerArea : MonoBehaviour
         for (var i = 0; i < parent.childCount; i++)
         {
             var child = parent.GetChild(i);
-            if (child.CompareTag("flower_plant"))
+            if (child.CompareTag("flower.plant"))
             {
                 // Found a flower plant, add it to the flower plants list
                 flowerPlants.Add(child.gameObject);
