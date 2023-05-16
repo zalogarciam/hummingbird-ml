@@ -290,7 +290,7 @@ public class HummingbirdAgent : Agent
             if (inFrontOfFlower)
             {
                 // Pick a random flower
-                var randomFlower = flowerArea.Flowers[Random.Range(0, flowerArea.Flowers.Count)];
+                var randomFlower = flowerArea.Flowers[Random.Range(0, flowerArea.Flowers.Count - 1)];
 
                 // Position 10 to 20 cm in from of the flower
                 var distanceFromFlower = Random.Range(.1f, .2f);
